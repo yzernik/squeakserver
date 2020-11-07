@@ -7,7 +7,7 @@ function mine_blocks {
     while true; do
 	printf "Mining 1 block to address: $MINING_ADDRESS ..."
 	docker-compose run btcctl generate 1
-	sleep 1
+	sleep 2
     done
 }
 

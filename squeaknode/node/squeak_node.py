@@ -334,3 +334,10 @@ class SqueakNode:
 
     def get_sent_payment(self, sent_payment_id):
         return self.postgres_db.get_sent_payment(sent_payment_id)
+
+    def sign_data(self, profile_id, data):
+        profile = self.postgres_db.get_profile(profile_id)
+        signing_key_str = profile.private_key.decode()
+        signing_key = CSigningKey(signing_key_str)
+        signature = signing_key.sign(data)
+        return signature

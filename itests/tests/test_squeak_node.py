@@ -971,3 +971,17 @@ def test_download_single_squeak(server_stub, admin_stub, other_server_stub, othe
     )
     print(get_buy_offers_response)
     assert len(get_buy_offers_response.offers) > 0
+
+
+def test_sign_data(server_stub, admin_stub, signing_profile_id):
+    # Create a new squeak using the new profile
+    data_to_sign = generate_challenge_proof()
+    sign_data_response = admin_stub.SignData(
+        squeak_admin_pb2.SignDataRequest(
+            profile_id=signing_profile_id,
+            data=data_to_sign,
+        )
+    )
+    signature = sign_data_response.signature
+    print("signature: {}".format(signature.hex()))
+    assert len(signature) > 0

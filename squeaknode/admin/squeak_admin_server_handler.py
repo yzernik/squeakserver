@@ -396,3 +396,12 @@ class SqueakAdminServerHandler(object):
         return squeak_admin_pb2.GetSentPaymentReply(
             sent_payment=sent_payment_msg,
         )
+
+    def handle_sign_data(self, request):
+        profile_id = request.profile_id
+        data = request.data
+        logger.info("Handle sign data with profile id: {}".format(profile_id))
+        signature = self.squeak_node.sign_data(profile_id, data)
+        return squeak_admin_pb2.SignDataReply(
+            signature=signature,
+        )

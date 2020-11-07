@@ -172,6 +172,10 @@ service SqueakAdmin {
   */
   rpc GetSentPayment (GetSentPaymentRequest) returns (GetSentPaymentReply) {}
 
+  /** sqkadmin: `signdata`
+  */
+  rpc SignData (SignDataRequest) returns (SignDataReply) {}
+
 }
 
 message CreateSigningProfileRequest {
@@ -605,4 +609,17 @@ message SyncResult {
 
     /// The ids of timed out peers
     repeated int32 timeout_peer_ids = 3;
+}
+
+message SignDataRequest {
+    /// The profile id
+    int32 profile_id = 1;
+
+    /// The data to sign
+    bytes data = 2;
+}
+
+message SignDataReply {
+    /// The signature
+    bytes signature = 1;
 }
