@@ -30,3 +30,12 @@ EXPOSE 12994
 # Copy the entrypoint script.
 COPY "docker/squeaknode/start-squeaknode.sh" .
 RUN chmod +x start-squeaknode.sh
+
+COPY "docker/squeaknode/generate-cert.sh" certs/
+COPY "docker/squeaknode/certificate.conf" certs/
+RUN chmod +x certs/generate-cert.sh
+
+RUN cd certs && \
+	./generate-cert.sh && \
+	pwd && \
+	ls -l

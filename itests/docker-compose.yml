@@ -80,6 +80,7 @@ services:
       - test_shared:/rpc
       - test_lnd_server_dir:/root/.lnd
       - ./config.ini:/app/config.ini
+      - test_certs_shared:/app/certs
     links:
       - "btcd:btcd"
       - "lnd_server:lnd"
@@ -97,6 +98,7 @@ services:
       - test_shared:/rpc
       - test_lnd_client_dir:/root/.lnd
       - ./config.ini:/app/config.ini
+      - test_certs_shared_other:/app/certs
     links:
       - "btcd:btcd"
       - "lnd_client:lnd"
@@ -113,6 +115,8 @@ services:
     volumes:
       - test_shared:/rpc
       - test_lnd_client_dir:/root/.lnd
+      - test_certs_shared:/squeaknode-certs
+      - test_certs_shared_other:/squeaknode-certs_other
     links:
       - "lnd_client:lnd"
     command: tail -f /dev/null
@@ -131,4 +135,10 @@ volumes:
   test_lnd_client_dir:
     driver: local
   test_lnd_server_dir:
+    driver: local
+
+  # Squeaknode ssl certs
+  test_certs_shared:
+    driver: local
+  test_certs_shared_other:
     driver: local

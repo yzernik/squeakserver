@@ -28,13 +28,27 @@ def other_server_stub():
 
 @pytest.fixture
 def admin_stub():
-    with grpc.insecure_channel("squeaknode:8994") as admin_channel:
+    with open('/squeaknode-certs/service.pem', 'rb') as f:
+        creds = grpc.ssl_channel_credentials(f.read())
+    options = (
+        ('grpc.ssl_target_name_override', 'localhost'),
+        ('grpc.default_authority', 'localhost'),
+    )
+    #with grpc.insecure_channel("squeaknode:8994") as admin_channel:
+    with grpc.secure_channel("squeaknode:8994", creds, options) as admin_channel:
         yield squeak_admin_pb2_grpc.SqueakAdminStub(admin_channel)
 
 
 @pytest.fixture
 def other_admin_stub():
-    with grpc.insecure_channel("squeaknode_other:8994") as admin_channel:
+    with open('/squeaknode-certs_other/service.pem', 'rb') as f:
+        creds = grpc.ssl_channel_credentials(f.read())
+    options = (
+        ('grpc.ssl_target_name_override', 'localhost'),
+        ('grpc.default_authority', 'localhost'),
+    )
+    #with grpc.insecure_channel("squeaknode_other:8994") as admin_channel:
+    with grpc.secure_channel("squeaknode_other:8994", creds, options) as admin_channel:
         yield squeak_admin_pb2_grpc.SqueakAdminStub(admin_channel)
 
 

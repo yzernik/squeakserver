@@ -165,7 +165,17 @@ class SqueakAdminServerServicer(squeak_admin_pb2_grpc.SqueakAdminServicer):
 
     def serve(self):
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+
+        import os
+        os.environ["GRPC_VERBOSITY"] = "debug"
+        with open('certs/ca.key', 'rb') as f:
+            private_key = f.read()
+        with open('certs/ca.cert', 'rb') as f:
+            certificate_chain = f.read()
+        server_credentials = grpc.ssl_server_credentials( ( (private_key, certificate_chain), ) )
+
         squeak_admin_pb2_grpc.add_SqueakAdminServicer_to_server(self, server)
-        server.add_insecure_port("{}:{}".format(self.host, self.port))
+        server.add_secure_port("{}:{}".format(self.host, self.port), server_credentials)
+        # server.add_insecure_port("{}:{}".format(self.host, self.port))
         server.start()
         server.wait_for_termination()
