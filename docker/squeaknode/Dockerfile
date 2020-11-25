@@ -36,6 +36,7 @@ COPY "docker/squeaknode/certificate.conf" certs/
 RUN chmod +x certs/generate-cert.sh
 
 RUN cd certs && \
-	./generate-cert.sh && \
-	pwd && \
+	./generate-cert.sh
+
+RUN cd certs && \
 	ls -l
