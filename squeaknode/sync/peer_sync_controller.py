@@ -42,12 +42,18 @@ class PeerSyncController:
             max_block,
         )
         remote_hashes = lookup_result.hashes
+        logger.info("remote_hashes: {}".format(
+            [hash.hex() for hash in remote_hashes]
+        ))
         # Get local hashes of saved squeaks
         local_hashes = self.squeak_controller.lookup_squeaks_include_locked(
             followed_addresses,
             min_block,
             max_block,
         )
+        logger.info("local_hashes: {}".format(
+            [hash.hex() for hash in local_hashes]
+        ))
         # Get hashes to download
         hashes_to_download = set(remote_hashes) - set(local_hashes)
         logger.info("hashes_to_download: {}".format(
