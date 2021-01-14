@@ -51,7 +51,7 @@ class PeerSyncController:
         # Get hashes to download
         hashes_to_download = set(remote_hashes) - set(local_hashes)
         logger.info("hashes_to_download: {}".format(
-            hash.hex() for hash in hashes_to_download
+            [hash.hex() for hash in hashes_to_download]
         ))
         # Download squeaks for the hashes
         # TODO: check if hash belongs to correct range after downloading.
