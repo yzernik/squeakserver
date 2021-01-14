@@ -35,6 +35,9 @@ class PeerSyncController:
     ):
         # Get list of followed addresses
         followed_addresses = self.squeak_controller.get_followed_addresses()
+        logger.info("followed_addresses: {}".format(
+            [hash.hex() for hash in followed_addresses]
+        ))
         # Get remote hashes
         lookup_result = self.peer_client.lookup_squeaks(
             followed_addresses,
