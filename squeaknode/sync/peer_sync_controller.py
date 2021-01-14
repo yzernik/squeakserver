@@ -50,7 +50,7 @@ class PeerSyncController:
         )
         # Get hashes to download
         hashes_to_download = set(remote_hashes) - set(local_hashes)
-        logger.inf("hashes_to_download: {}".format(
+        logger.info("hashes_to_download: {}".format(
             hash.hex() for hash in hashes_to_download
         ))
         # Download squeaks for the hashes
