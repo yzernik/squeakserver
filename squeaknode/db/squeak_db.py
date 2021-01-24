@@ -3,6 +3,8 @@ from contextlib import contextmanager
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from typing import List
+from typing import Optional
 
 import sqlalchemy
 from sqlalchemy import func
@@ -74,7 +76,7 @@ class SqueakDb:
     def sent_offers(self):
         return self.models.sent_offers
 
-    def insert_squeak(self, squeak, block_header_bytes):
+    def insert_squeak(self, squeak, block_header_bytes) -> bytes:
         """ Insert a new squeak.
 
         Return the hash (bytes) of the inserted squeak.
@@ -102,16 +104,18 @@ class SqueakDb:
                 pass
             return get_hash(squeak)
 
-    def get_squeak_entry(self, squeak_hash: bytes):
+    def get_squeak_entry(self, squeak_hash: bytes) -> Optional[SqueakEntry]:
         """ Get a squeak. """
         s = select([self.squeaks]).where(
             self.squeaks.c.hash == squeak_hash.hex())
         with self.get_connection() as connection:
             result = connection.execute(s)
             row = result.fetchone()
+            if row is None:
+                return None
             return self._parse_squeak_entry(row)
 
-    def get_squeak_entry_with_profile(self, squeak_hash: bytes):
+    def get_squeak_entry_with_profile(self, squeak_hash: bytes) -> Optional[SqueakEntryWithProfile]:
         """ Get a squeak with the author profile. """
         s = (
             select([self.squeaks, self.profiles])
@@ -126,9 +130,11 @@ class SqueakDb:
         with self.get_connection() as connection:
             result = connection.execute(s)
             row = result.fetchone()
+            if row is None:
+                return None
             return self._parse_squeak_entry_with_profile(row)
 
-    def get_timeline_squeak_entries_with_profile(self):
+    def get_timeline_squeak_entries_with_profile(self) -> List[SqueakEntryWithProfile]:
         """ Get all followed squeaks. """
         s = (
             select([self.squeaks, self.profiles])
@@ -151,7 +157,7 @@ class SqueakDb:
 
     def get_squeak_entries_with_profile_for_address(
         self, address, min_block, max_block
-    ):
+    ) -> List[SqueakEntryWithProfile]:
         """ Get a squeak. """
         s = (
             select([self.squeaks, self.profiles])
@@ -175,7 +181,7 @@ class SqueakDb:
             rows = result.fetchall()
             return [self._parse_squeak_entry_with_profile(row) for row in rows]
 
-    def get_thread_ancestor_squeak_entries_with_profile(self, squeak_hash: bytes):
+    def get_thread_ancestor_squeak_entries_with_profile(self, squeak_hash: bytes) -> List[SqueakEntryWithProfile]:
         """ Get all reply ancestors of squeak hash. """
         ancestors = (
             select(
@@ -242,7 +248,7 @@ class SqueakDb:
         #     rows = curs.fetchall()
         #     return [self._parse_squeak_entry_with_profile(row) for row in rows]
 
-    def get_thread_reply_squeak_entries_with_profile(self, squeak_hash: bytes):
+    def get_thread_reply_squeak_entries_with_profile(self, squeak_hash: bytes) -> List[SqueakEntryWithProfile]:
         """ Get all replies for a squeak hash. """
         s = (
             select([self.squeaks, self.profiles])
@@ -329,7 +335,7 @@ class SqueakDb:
         interval_seconds,
         include_unverified=False,
         include_locked=False,
-    ):
+    ) -> List[bytes]:
         """ Lookup squeaks. """
         if not addresses:
             return []
@@ -382,7 +388,7 @@ class SqueakDb:
 
     def lookup_squeaks_needing_offer(
         self, addresses, min_block, max_block, peer_id, include_unverified=False
-    ):
+    ) -> List[bytes]:
         """ Lookup squeaks that are locked and don't have an offer. """
         if not addresses:
             return []
@@ -443,7 +449,7 @@ class SqueakDb:
         #     hashes = [bytes.fromhex(row["hash"]) for row in rows]
         #     return hashes
 
-    def insert_profile(self, squeak_profile):
+    def insert_profile(self, squeak_profile) -> int:
         """ Insert a new squeak profile. """
         ins = self.profiles.insert().values(
             profile_name=squeak_profile.profile_name,
@@ -1015,6 +1021,8 @@ class SqueakDb:
         with self.get_connection() as connection:
             result = connection.execute(s)
             row = result.fetchone()
+            if row is None:
+                return None
             sent_offer = self._parse_sent_offer(row)
             return sent_offer
 
@@ -1028,6 +1036,8 @@ class SqueakDb:
         with self.get_connection() as connection:
             result = connection.execute(s)
             row = result.fetchone()
+            if row is None:
+                return None
             sent_offer = self._parse_sent_offer(row)
             return sent_offer
 
@@ -1103,9 +1113,7 @@ class SqueakDb:
                 received_payment = self._parse_received_payment(row)
                 yield received_payment
 
-    def _parse_squeak_entry(self, row):
-        if row is None:
-            return None
+    def _parse_squeak_entry(self, row) -> SqueakEntry:
         secret_key_column = row["secret_key"]
         secret_key = bytes.fromhex(
             secret_key_column) if secret_key_column else b""
@@ -1137,9 +1145,7 @@ class SqueakDb:
             following=row["following"],
         )
 
-    def _parse_squeak_entry_with_profile(self, row):
-        if row is None:
-            return None
+    def _parse_squeak_entry_with_profile(self, row) -> SqueakEntryWithProfile:
         squeak_entry = self._parse_squeak_entry(row)
         squeak_profile = self._parse_squeak_profile(row)
         return SqueakEntryWithProfile(
@@ -1213,9 +1219,7 @@ class SqueakDb:
             peer=peer,
         )
 
-    def _parse_sent_offer(self, row):
-        if row is None:
-            return None
+    def _parse_sent_offer(self, row) -> SentOffer:
         return SentOffer(
             sent_offer_id=row["sent_offer_id"],
             squeak_hash=bytes.fromhex(row["squeak_hash"]),
@@ -1229,9 +1233,7 @@ class SqueakDb:
             client_addr=row["client_addr"],
         )
 
-    def _parse_received_payment(self, row):
-        if row is None:
-            return None
+    def _parse_received_payment(self, row) -> ReceivedPayment:
         return ReceivedPayment(
             received_payment_id=row["received_payment_id"],
             created=row["created"],
